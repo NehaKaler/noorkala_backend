@@ -31,7 +31,7 @@ app = FastAPI()
 router = APIRouter()
 
 # app.include_router(translate.router)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Set up credentials
 SERVICE_ACCOUNT_FILE = "service-account.json"
