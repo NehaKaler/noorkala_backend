@@ -177,6 +177,7 @@ def call_enhance_api(prompt: str, image_url: str):
     print("starting image enhancement")
     if not REPLICATE_API_TOKEN:
         raise ValueError("Replicate API token is not set or invalid.")
+    print("replicate token ", REPLICATE_API_TOKEN)
     try:
         client = replicate.Client(api_token=REPLICATE_API_TOKEN)
         print("replicate client")
@@ -319,7 +320,7 @@ async def caption(
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
     
-@app.post("/api/business-report")
+@app.post("/business-report")
 async def generate_business_insight(data: SalesData):
     try:
         # Combine insights from multiple products
