@@ -18,9 +18,9 @@ from fastapi import Request
 from pathlib import Path
 from pydantic import BaseModel
 from typing import List
-from google.cloud import translate_v3 as translate
-from google.cloud import texttospeech
-from google.oauth2 import service_account
+# from google.cloud import translate_v3 as translate
+# from google.cloud import texttospeech
+# from google.oauth2 import service_account
 
 import google.generativeai as genai
 
@@ -33,9 +33,9 @@ router = APIRouter()
 # app.include_router(translate.router)
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Set up credentials
-SERVICE_ACCOUNT_FILE = "service-account.json"
-credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
+# # Set up credentials
+# SERVICE_ACCOUNT_FILE = "service-account.json"
+# credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
 
 # static_path = os.path.join(os.getcwd() + "/static")
 # app.mount("/static", StaticFiles(directory=static_path), name="static")
@@ -84,47 +84,47 @@ language_voice_map = {
     
 # --------------- UTILS ------------------
 
-def translate_and_optionally_speak(text: str, lang: str, speak: bool = False):
-    lang = lang.strip().capitalize()
-    target_lang_code = language_code_map.get(lang, "en")
-    voice_code = language_voice_map.get(lang, "en-US")
+# def translate_and_optionally_speak(text: str, lang: str, speak: bool = False):
+#     lang = lang.strip().capitalize()
+#     target_lang_code = language_code_map.get(lang, "en")
+#     voice_code = language_voice_map.get(lang, "en-US")
 
-    # Translate using Translate v3 API
-    translate_client = translate.TranslationServiceClient(credentials=credentials)
-    parent = f"projects/{credentials.project_id}/locations/global"
+#     # Translate using Translate v3 API
+#     translate_client = translate.TranslationServiceClient(credentials=credentials)
+#     parent = f"projects/{credentials.project_id}/locations/global"
 
-    response = translate_client.translate_text(
-        contents=[text],
-        target_language_code=target_lang_code,
-        parent=parent
-    )
-    translated = response.translations[0].translated_text
+#     response = translate_client.translate_text(
+#         contents=[text],
+#         target_language_code=target_lang_code,
+#         parent=parent
+#     )
+#     translated = response.translations[0].translated_text
 
-    audio_path = None
+#     audio_path = None
 
-    if speak:
-        tts_client = texttospeech.TextToSpeechClient(credentials=credentials)
-        synthesis_input = texttospeech.SynthesisInput(text=translated)
-        voice = texttospeech.VoiceSelectionParams(
-            language_code=voice_code,
-            ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
-        )
-        audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
+#     if speak:
+#         tts_client = texttospeech.TextToSpeechClient(credentials=credentials)
+#         synthesis_input = texttospeech.SynthesisInput(text=translated)
+#         voice = texttospeech.VoiceSelectionParams(
+#             language_code=voice_code,
+#             ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+#         )
+#         audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
 
-        tts_response = tts_client.synthesize_speech(
-            input=synthesis_input,
-            voice=voice,
-            audio_config=audio_config
-        )
+#         tts_response = tts_client.synthesize_speech(
+#             input=synthesis_input,
+#             voice=voice,
+#             audio_config=audio_config
+#         )
 
-        audio_path = f"tts_output_{target_lang_code}.mp3"
-        with open(audio_path, "wb") as out:
-            out.write(tts_response.audio_content)
+#         audio_path = f"tts_output_{target_lang_code}.mp3"
+#         with open(audio_path, "wb") as out:
+#             out.write(tts_response.audio_content)
 
-    return {
-        "translated": translated,
-        "audio_path": audio_path
-    }
+#     return {
+#         "translated": translated,
+#         "audio_path": audio_path
+#     }
 
 
 def generate_enhancement_prompt(theme=str, occasion=str, productType=str, region=str, gender=None, feedback=None):
@@ -345,20 +345,20 @@ async def generate_business_insight(data: SalesData):
         raise HTTPException(status_code=500, detail=f"Error generating business report: {str(e)}")
 
 
-@router.post("/translate_and_speak")
-async def handle_translate_speak(request: Request):
-    data = await request.json()
-    text = data.get("text")
-    lang = data.get("lang")
-    speak = data.get("speak", False)
+# @router.post("/translate_and_speak")
+# async def handle_translate_speak(request: Request):
+#     data = await request.json()
+#     text = data.get("text")
+#     lang = data.get("lang")
+#     speak = data.get("speak", False)
 
-    result = translate_and_optionally_speak(text, lang, speak)
+#     result = translate_and_optionally_speak(text, lang, speak)
     
-    response_data = {
-        "translated": result["translated"],
-    }
+#     response_data = {
+#         "translated": result["translated"],
+#     }
 
-    if result["audio_path"]:
-        response_data["audio_url"] = f"/static/audio/{result['audio_path'].split('/')[-1]}"
+#     if result["audio_path"]:
+#         response_data["audio_url"] = f"/static/audio/{result['audio_path'].split('/')[-1]}"
 
-    return response_data
+#     return response_data
