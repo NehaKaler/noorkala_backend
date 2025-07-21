@@ -183,16 +183,20 @@ def call_enhance_api(prompt: str, image_url: str):
         print("replicate client")
         output = client.run(
             "black-forest-labs/flux-kontext-pro",
-            input={"prompt": prompt, "input_image": image_url, "output_format": "jpg"}
+            input={
+                "prompt": prompt,
+                "image": image_url,
+                "output_format": "jpg",
+                "guidance": 8,
+                "strength": 0.8
+            }
         )
         print("replicate output: ", output)
         if not output:
             print("❌ Error: No output received from Replicate.")
             return None
-        # Save locally
-        print("replicate output: ", output)
+
         filename = f"enhanced_{int(time.time())}.jpg"
-        print(filename)
         save_path = os.path.join("static", filename)
         try:
             image_data = requests.get(output).content
@@ -201,16 +205,17 @@ def call_enhance_api(prompt: str, image_url: str):
             return None
         
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        image_data = requests.get(output).content
         with open(save_path, "wb") as f:
             f.write(image_data)
+
         return f"{filename}"
     except replicate.exceptions.AuthenticationError:
         print("Replicate authentication error")
         raise ValueError("Invalid Replicate API token. Please check your credentials.")
     except Exception as e:
-        print("Exception occured with replicate")
+        print("Exception occurred with replicate")
         raise RuntimeError(f"Error while calling replicate API: {e}")
+
 
 def call_caption_api(image: UploadFile, prompt: str):
     genai.configure(api_key=GOOGLE_API_KEY)
